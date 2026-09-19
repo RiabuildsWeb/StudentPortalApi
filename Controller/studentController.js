@@ -1,14 +1,18 @@
-import Student from "../Models/StudentModel.js";
+import studentModel from "../Models/StudentModel.js";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const createStudent = async (req, res) => {
   try {
-    const { name, regNo, email } = req.body;
+    const { name, regNo, email, password } = req.body;
+    const genSalt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, genSalt);
 
-    const student = await Student.create({
+    const student = await studentModel.create({
       name,
       regNo,
-      email
+      email,
+      password: hashedPassword
     });
 
     res.status(201).json({
@@ -23,6 +27,32 @@ const createStudent = async (req, res) => {
   }
 };
 
+//LOGIN USER
+const loginStudent = async (req, res) => {
+try {
+ const { email, password } = req.body
+ const student = await studentModel.findOne({ email })
+if (!student) {
+ return res.status(404).json({
+message: "Are you sure you signed up?"
+})
+}
+const isMatch = await bcrypt.compare(password, student.password)
+if (!isMatch) {
+return res.status(401).json({
+ message: "Invalid credentials"
+})
+ }
+return res.status(200).json({
+message: "Student logged in successfully",
+      data: student
+})
+ } catch (error) {
+ return res.status(500).json({ message: error.message })
+ }
+}
+
+
 const getStudent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -33,7 +63,7 @@ const getStudent = async (req, res) => {
       });
     }
 
-    const student = await Student.findById(id);
+    const student = await studentModel.findById(id);
 
     if (!student) {
       return res.status(404).json({
@@ -66,7 +96,7 @@ const updateStudent = async (req, res) => {
       });
     }
 
-    const student = await Student.findByIdAndUpdate(
+    const student = await studentModel.findByIdAndUpdate(
       id,
       { name, regNo, email },
       {
@@ -103,7 +133,7 @@ const deleteStudent = async (req, res) => {
   });
 }
 
-    const student = await Student.findByIdAndDelete(id);
+    const student = await studentModel.findByIdAndDelete(id);
 
     if (!student) {
       return res.status(404).json({
@@ -124,6 +154,7 @@ const deleteStudent = async (req, res) => {
 
 export {
   createStudent,
+  loginStudent,
   getStudent,
   updateStudent,
   deleteStudent

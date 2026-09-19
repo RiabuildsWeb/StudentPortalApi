@@ -21,13 +21,22 @@ const studentSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true
-    }
+    },
+
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+      }
+    ]
   },
   {
     timestamps: true
   }
 );
 
-const Student = mongoose.model("Student", studentSchema);
+const studentModel =
+  mongoose.models.Student || mongoose.model("Student", studentSchema);
 
-export default Student;
+export default studentModel;
+

@@ -1,4 +1,4 @@
-import studentModel from "../Models/StudentModel.js";
+import studentModel from "../Models/studentModel.js";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
